@@ -170,7 +170,7 @@ for ii = 1:maxiters
     U1 = U - beta_opt*gradU;
     T1 = TODO;
     J1 = TODO;
-    disp(J1)
+    disp(['Cost function value: ', J1])
     
     % check convergence conditions
     if J - J1 < tol*J
