@@ -13,11 +13,22 @@ T = zeros(length(T0), length(time));
 T(:,1) = T0;
 for ii = 1:length(time)-1
     dt = time(ii+1) - time(ii);
+
+    % Security for ukm1
+    if ii == 1
+        ukm1 = [0;0];
+    else
+        ukm1 = U(:,ii);
+    end
+
+    % Calculate RHS
+    rhs = ((E + (dt/2) * A) * T(:,ii)) +  dt * B * ((U(:,ii) - ukm1)/2) + dt * Bd;
+    
     if nargin >= 8
         % LU factorization is available. 
-        T(:,ii+1) = TODO;
+        T(:,ii+1) = LU \ rhs;
     else
         % LU factorization is not available. (START WITH THIS LINE)
-        T(:,ii+1) = TODO;
+        T(:,ii+1) = (E - (dt/2) * A)\rhs;
     end
 end

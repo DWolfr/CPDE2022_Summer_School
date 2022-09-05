@@ -85,7 +85,8 @@ R = eye(m);
 X0 = zeros(N,1);      % Initial condition (for the state)
 U = zeros(m, NT-1);   % Initial guess for the control
 
-T = OCP_compute_temperature(time, X0, E, A, Bd, B, U);
+% SLOW LINE 
+% T = OCP_compute_temperature(time, X0, E, A, Bd, B, U);
 
 % OPTIONAL: % you can use an decomposition of the matrix E - dt/2*A 
 % that needs to be inverted at every time step
@@ -95,12 +96,12 @@ LU = decomposition(E - dt/2*A);
 T = OCP_compute_temperature(time, X0, E, A, Bd, B, U, LU);
 
 xlimits = Lslit*[-1,1]; ylimits = Wfield*[-1.5, 0.5]; 
-make_movie = 1; % if you want to create an mp4 movie (1) or not (0)
+make_movie = 0; % if you want to create an mp4 movie (1) or not (0)
 % OCP_display_temperature_field(T, Mesh, time, make_movie, xlimits, ylimits, xr, yr);
 
 %% 1b. Cost function and gradient computation
 
-J = OCP_costfunction(T, U, Q, R, time);
+J = OCP_costfunction(T, U, eye(size(T,1)), R, time);
 
 LUphi = decomposition(E.' - dt/2*A.');
 Phi = OCP_compute_adjoint(time, T, E, A, Q, LUphi);
@@ -143,6 +144,9 @@ tol      = 1e-5;
 for ii = 1:maxiters
     
     % compute gradient (at (U, X))
+
+    % Calculate adjoint solution
+    adj_T = OCP_compute_adjoint(time,T,E,A,Q);
     
     % compute coefficients in quadratic approximation
     
@@ -168,8 +172,8 @@ for ii = 1:maxiters
     
     % compute new control and cost function value
     U1 = U - beta_opt*gradU;
-    T1 = TODO;
-    J1 = TODO;
+    T1 = OCP_compute_temperature(time,zeros(size(A,1,1)),E,A,Bd,B,U1);
+    J1 = OCP_costfunction(T1,U1,Q,R,time);
     disp(['Cost function value: ', J1])
     
     % check convergence conditions
